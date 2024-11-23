@@ -4,7 +4,7 @@ import { DataGrid, GridColDef,GridToolbar } from '@mui/x-data-grid';
 import Button from '@mui/material/Button';
 import axios from "axios";
 import { useEffect, useState } from "react";
-import { SignedIn, SignedOut, SignInButton, UserButton } from '@clerk/clerk-react'
+import { SignedIn, SignedOut, SignInButton } from '@clerk/clerk-react'
 
 
 
@@ -34,8 +34,8 @@ const columns: GridColDef<any>[] = [
     headerName: 'Actions',
     renderCell: (params) => (
       <div >
-        <Button variant="contained" style={{ margin:'5px'}} onClick={(e)=>{axios.post(`https://inframanager.onrender.com/SpoolUp/${params.id}`)}}>Turn On</Button>
-        <Button variant="contained" onClick={(e)=>{axios.post(`https://inframanager.onrender.com/SpoolDown/${params.id}`)}}>Turn Off</Button>
+        <Button variant="contained" style={{ margin:'5px'}} onClick={()=>{axios.post(`https://inframanager.onrender.com/SpoolUp/${params.id}`)}}>Turn On</Button>
+        <Button variant="contained" onClick={()=>{axios.post(`https://inframanager.onrender.com/SpoolDown/${params.id}`)}}>Turn Off</Button>
       </div>
       
     ),
@@ -52,7 +52,7 @@ const columns: GridColDef<any>[] = [
 
 
 export default function DataGridDemo() {
-  const [reset,setReset]=useState<boolean>(false)
+  
   const [rows, setRows] = useState<droplet[]>([]);
 
 
@@ -95,7 +95,7 @@ export default function DataGridDemo() {
       
       <div style={{alignItems:'center',justifyContent:'center'}}>
             
-            <Button onClick={e=>{window.location.reload()}}>Reset</Button>
+            <Button onClick={()=>{window.location.reload()}}>Reset</Button>
           <Box sx={{ height: 400, width: '100%' }}>
             <DataGrid
               rows={rows}
