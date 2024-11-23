@@ -87,9 +87,11 @@ export default function DataGridDemo() {
     <>
     <h1 style={{textAlign:'center'}}>InfraManager V0.1</h1>
     <SignedOut>
+      <div style={{textAlign:'center'}}>
       <SignInButton>
         Please sign in with your credentials to Access InfraManager V0.1
       </SignInButton>
+      </div>
     </SignedOut>
     <SignedIn>
       
