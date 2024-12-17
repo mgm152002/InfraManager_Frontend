@@ -1,10 +1,10 @@
-
+import * as React from 'react';
 import Box from '@mui/material/Box';
-import { DataGrid, GridColDef,GridToolbar } from '@mui/x-data-grid';
+import { DataGrid, GridActionsCellItem, GridColDef,GridSlotProps,GridSlotsComponentsProps,GridToolbar, GridToolbarColumnsButton, GridToolbarContainer, GridToolbarDensitySelector, GridToolbarExport, GridToolbarFilterButton } from '@mui/x-data-grid';
 import Button from '@mui/material/Button';
 import axios from "axios";
 import { useEffect, useState } from "react";
-import { SignedIn, SignedOut, SignInButton } from '@clerk/clerk-react'
+import { SignedIn, SignedOut, SignInButton, UserButton } from '@clerk/clerk-react'
 
 
 
@@ -14,6 +14,11 @@ interface droplet{
   status:string
 }
 
+declare module '@mui/x-data-grid' {
+  interface FooterPropsOverrides {
+    status: string;
+  }
+}
 
 const columns: GridColDef<any>[] = [
   { field: 'id', headerName: 'ID', width: 90 },
@@ -27,6 +32,21 @@ const columns: GridColDef<any>[] = [
     field: 'status',
     headerName: 'Status',
     width: 150,
+    renderCell : params=>{
+      var status='off'
+      if(params.value==='active'){
+        status='active'
+      }
+      console.log(params.value)
+      return(
+        
+        <Chip
+        label={status === 'active' ? 'on' : 'off'} // Set label
+        color={status === 'active' ? 'success' : 'error'} // Use MUI's built-in colors
+        variant="outlined"
+      />      )
+      
+    }
     
   },
   {
@@ -34,11 +54,15 @@ const columns: GridColDef<any>[] = [
     headerName: 'Actions',
     renderCell: (params) => (
       <div >
-        <Button variant="contained" style={{ margin:'5px'}} onClick={()=>{axios.post(`https://inframanager.onrender.com/SpoolUp/${params.id}`)}}>Turn On</Button>
-        <Button variant="contained" onClick={()=>{axios.post(`https://inframanager.onrender.com/SpoolDown/${params.id}`)}}>Turn Off</Button>
+        <Button variant="contained" style={{ margin:'5px'}} onClick={(e)=>{axios.post(`https://inframanager.onrender.com/SpoolUp/${params.id}`)}}>Turn On</Button>
+        <Button variant="contained" onClick={(e)=>{axios.post(`https://inframanager.onrender.com/SpoolDown/${params.id}`)}}>Turn Off</Button>
       </div>
       
     ),
+    
+      
+  
+
     width: 225
   
     
@@ -48,13 +72,29 @@ const columns: GridColDef<any>[] = [
 ];
  
  
- 
+export function CustomFooterStatusComponent(
+  props: NonNullable<GridSlotsComponentsProps['footer']>,
+) {
+  return (
+    <Box sx={{ p: 1, display: 'flex' }}>
+      <FiberManualRecordIcon
+        fontSize="small"
+        sx={{
+          mr: 1,
+          color: props.status === 'connected' ? '#4caf50' : '#d9182e',
+        }}
+      />
+      Status {props.status}
+    </Box>
+  );
+}
 
 
 export default function DataGridDemo() {
-  
+  const [reset,setReset]=useState<boolean>(false)
   const [rows, setRows] = useState<droplet[]>([]);
-
+  const [status,setStatus]=useState('disconnected')
+  const [loading,setLoading]=useState<boolean>(true)
 
   // Fetch data from the API
   const fetchData = () => {
@@ -71,6 +111,8 @@ export default function DataGridDemo() {
 
         // Update state
         setRows(data);
+        setLoading(false)
+        setStatus('connected')
       })
       .catch((error) => {
         console.error("Error fetching data:", error);
@@ -83,21 +125,50 @@ export default function DataGridDemo() {
 
   }, []); 
 
+  function EditToolbar(props: GridSlotProps['toolbar']) {  
+    
+  
+    return (
+      
+      <GridToolbarContainer>
+                <Actions/>
+
+        <GridToolbarColumnsButton />
+      <GridToolbarFilterButton />
+      <GridToolbarDensitySelector
+        slotProps={{ tooltip: { title: 'Change density' } }}
+      />
+      <Box sx={{ flexGrow: 1 }} />
+      <GridToolbarExport
+        slotProps={{
+          tooltip: { title: 'Export data' },
+          button: { variant: 'outlined' },
+        }}
+      />
+        <Button color="primary" title='Reset'  onClick={()=>{window.location.reload()}}>
+          <RestartAltIcon/>
+        </Button>
+      </GridToolbarContainer>
+    );
+  }
+  
+ 
+
   return (
     <>
-    <h1 style={{textAlign:'center'}}>InfraManager V0.1</h1>
+    
     <SignedOut>
       <div style={{textAlign:'center'}}>
       <SignInButton>
         Please sign in with your credentials to Access InfraManager V0.1
       </SignInButton>
-      </div>
     </SignedOut>
     <SignedIn>
+      <ResponsiveAppBar></ResponsiveAppBar>
       
       <div style={{alignItems:'center',justifyContent:'center'}}>
             
-            <Button onClick={()=>{window.location.reload()}}>Reset</Button>
+            <Button onClick={e=>{window.location.reload()}}>Reset</Button>
           <Box sx={{ height: 400, width: '100%' }}>
             <DataGrid
               rows={rows}
